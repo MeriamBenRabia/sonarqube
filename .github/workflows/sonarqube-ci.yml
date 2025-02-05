@@ -3,10 +3,10 @@ name: SonarQube CI
 on:
   push:
     branches:
-      - main  # Changez cette branche si vous travaillez sur une autre branche
+      - master  # Changez cette branche si vous travaillez sur une autre branche
   pull_request:
     branches:
-      - main  # Changez cette branche si vous travaillez sur une autre branche
+      - master  # Changez cette branche si vous travaillez sur une autre branche
 
 jobs:
   build:
