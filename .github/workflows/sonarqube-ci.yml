@@ -3,10 +3,10 @@ name: SonarQube CI
 on:
   push:
     branches:
-      - master  # Changez cette branche si vous travaillez sur une autre branche
+      - master
   pull_request:
     branches:
-      - master  # Changez cette branche si vous travaillez sur une autre branche
+      - master
 
 jobs:
   build:
@@ -22,15 +22,33 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Check Java Version
+        run: java -version
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Run Tests with Debug Logging
+        run: ./gradlew test --stacktrace --info --no-daemon
 
-      - name: Run SonarQube analysis
+      - name: Upload Test Report if Failing
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: sonar-scanner-engine/build/reports/tests/test/
+
+      - name: Run SonarQube Analysis
         run: |
           mvn sonar:sonar \
             -Dsonar.projectKey=inf8371_tp1 \
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=sqp_049134b79724d72b3eb5ad3b17192b186bd375d6
+
