@@ -25,14 +25,26 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Debug environment
+        run: java -version && ./gradlew --version && env && ls -al
+
+      - name: Clear Gradle cache
+        run: rm -rf ~/.gradle/caches
+
       - name: Clean project
         run: ./gradlew clean
 
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Run tests
-        run: ./gradlew test
+      - name: Run tests sequentially
+        run: ./gradlew test --no-parallel
+
+      - name: Wait for SonarQube
+        run: sleep 30
+
+      - name: Test SonarQube connection
+        run: curl -f http://localhost:9000 || echo "SonarQube not reachable"
 
       - name: Run SonarQube analysis
         run: |
@@ -40,4 +52,3 @@ jobs:
             -Dsonar.projectKey=inf8371_tp1 \
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=sqp_049134b79724d72b3eb5ad3b17192b186bd375d6
-
