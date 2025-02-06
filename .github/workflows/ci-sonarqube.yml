@@ -1,0 +1,21 @@
+
+name: SonarQube CI
+
+on:
+  push:
+    branches:
+      - master  # Changez cette branche si vous travaillez sur une autre branche
+  pull_request:
+    branches:
+      - master  # Changez cette branche si vous travaillez sur une autre branche
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Build with Gradle
+        run: ./gradlew build
