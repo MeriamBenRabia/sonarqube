@@ -2,9 +2,9 @@ name: Build and Test SonarQube (Gradle)
 
 on:
   push:
-    branches: [ "main" ]     # or your default branch
+    branches: [ "master" ]     # or your default branch
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   build:
