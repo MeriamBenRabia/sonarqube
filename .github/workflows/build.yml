@@ -47,12 +47,13 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Token d'authentification SonarQube
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # URL de l'instance SonarQube
-        run: ./gradlew sonar --info
-
-      # Étape 6: Démarrage de SonarQube (optionnel, si vous voulez démarrer une instance locale)
-      - name: Start SonarQube (optional)
         run: |
-          unzip -q sonar-application/build/distributions/*.zip -d sonar-application/build/unzipped/
-          cd sonar-application/build/unzipped/*/bin/linux-x86-64/
-          chmod +x sonar.sh
-          ./sonar.sh start
+          # Vérifiez que le fichier sonar-project.properties existe
+          if [ ! -f sonar-project.properties ]; then
+            echo "sonar.projectKey=inf8371_tp1" > sonar-project.properties
+            echo "sonar.projectName=inf8371_tp1" >> sonar-project.properties
+            echo "sonar.projectVersion=1.0" >> sonar-project.properties
+            echo "sonar.sources=src" >> sonar-project.properties
+            echo "sonar.sourceEncoding=UTF-8" >> sonar-project.properties
+          fi
+          ./gradlew sonar --info -Dorg.gradle.jvmargs="-Xmx2g"
