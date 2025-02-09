@@ -199,11 +199,13 @@ allprojects {
 apply plugin: 'org.sonarqube'
 sonar {
   properties {
-    property 'sonar.projectName', projectTitle
+    property "sonar.projectKey", "tp1_inf8371"
+    property "sonar.projectName", "tp1_inf8371"
     property 'sonar.projectVersion', "${versionInSources}-SNAPSHOT"
     property 'sonar.buildString', version
   }
 }
+
 
 tasks.named('wrapper') {
   distributionType = Wrapper.DistributionType.ALL

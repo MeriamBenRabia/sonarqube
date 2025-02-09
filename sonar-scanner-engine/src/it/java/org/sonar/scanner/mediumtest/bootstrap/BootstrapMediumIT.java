@@ -23,12 +23,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import java.io.ByteArrayInputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -174,29 +171,12 @@ class BootstrapMediumIT {
   /**
    * For now this test is just checking that the scanner completes successfully, with no input files, and mocking server responses to the bare minimum.
    */
-  /*@Test
+  @Test
   void should_complete_successfully(@TempDir Path baseDir) {
     var exitCode = runScannerEngine(new ScannerProperties()
       .addProperty(SONAR_HOST_URL, sonarqube.baseUrl())
       .addProperty(SONAR_PROJECT_KEY, PROJECT_KEY)
       .addProperty(SONAR_PROJECT_BASE_DIR, baseDir.toString()));
-
-    assertThat(exitCode).isZero();
-    assertThat(logTester.logs()).contains("SonarScanner Engine completed successfully");
-  }*/
-
-  @Test
-  void should_complete_successfully(@TempDir Path baseDir) throws Exception {
-    // Ensure you have real content:
-    Path myClass = baseDir.resolve("MyClass.java");
-    Files.writeString(myClass, "class MyClass { }");
-
-
-    var exitCode = runScannerEngine(new ScannerProperties()
-                    .addProperty(SONAR_HOST_URL, sonarqube.baseUrl())
-                    .addProperty(SONAR_PROJECT_KEY, PROJECT_KEY)
-                    .addProperty(SONAR_PROJECT_BASE_DIR, baseDir.toString())
-    );
 
     assertThat(exitCode).isZero();
     assertThat(logTester.logs()).contains("SonarScanner Engine completed successfully");
