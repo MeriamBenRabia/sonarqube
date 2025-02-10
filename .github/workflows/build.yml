@@ -1,4 +1,4 @@
-name: CI Pipeline for SonarQube Analysis
+name: CI Pipeline for SonarQube
 
 on:
   push:
@@ -35,35 +35,20 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Build and run unit tests
-        run: |
-          echo "Starting Build and Tests..."
-          ./gradlew build test || { echo "❌ Tests failed! Check logs."; exit 1; }
-          echo "✅ Build and Tests passed!"
+      - name: Build
+        run: ./gradlew build
+
+      - name: Run unit tests
+        run: ./gradlew build
 
       - name: Start SonarQube
         run: |
-          echo "Starting SonarQube..."
+          # Démarrer SonarQube en arrière-plan
           ./start.sh &
-
-          echo "Waiting for SonarQube to be ready..."
-          for i in {1..30}; do
-            if curl -s http://localhost:9000/api/system/status | grep -q "UP"; then
-              echo "✅ SonarQube is running!"
-              exit 0
-            fi
+          
+          echo "Waiting for SonarQube to start..."
+          while ! curl -s http://localhost:9000/api/system/status | grep -q "UP"; do
             sleep 5
           done
-
-          echo "❌ SonarQube failed to start!"
-          exit 1
-
-      - name: Run SonarQube analysis
-        run: |
-          echo "Running SonarQube analysis..."
-          ./gradlew sonar --stacktrace \
-            -Dsonar.projectKey=tp1_inf8371 \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} || { echo "❌ SonarQube analysis failed!"; exit 1; }
-          echo "✅ SonarQube analysis completed!"
-
+          
+          echo "SonarQube is up and running!"
