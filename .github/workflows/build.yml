@@ -43,9 +43,9 @@ jobs:
 
       - name: Show test results in logs
         run: |
-          echo "====== TEST RESULTS ======"
+          echo "===== TEST RESULTS ====="
           cat build/reports/tests/test/index.html || echo "Test report not found."
-          echo "====== TEST SUMMARY ======"
+          echo "===== TEST SUMMARY ====="
           cat build/test-results/test/*.xml || echo "Test result XML not found."
 
       - name: Run test coverage analysis (JaCoCo)
@@ -53,7 +53,7 @@ jobs:
 
       - name: Show coverage report in logs
         run: |
-          echo "====== COVERAGE REPORT ======"
+          echo "===== COVERAGE REPORT ====="
           cat build/reports/jacoco/test/jacocoTestReport.xml || echo "Coverage report not found."
 
       - name: Start SonarQube
