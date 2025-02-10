@@ -48,10 +48,8 @@ jobs:
         run: |
           # Démarrer SonarQube en arrière-plan
           ./start.sh &
-          
           echo "Waiting for SonarQube to start..."
           while ! curl -s http://localhost:9000/api/system/status | grep -q "UP"; do
             sleep 5
           done
-          
           echo "SonarQube is up and running!"
