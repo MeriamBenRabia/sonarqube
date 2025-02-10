@@ -27,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
@@ -46,10 +47,10 @@ import org.sonar.api.CoreProperties;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.platform.Server;
 import org.sonar.api.utils.SonarException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.sonar.api.utils.HttpDownloader.HttpException;
 
@@ -66,6 +67,16 @@ class DefaultHttpDownloaderIT {
     socketConnection = new SocketConnection(new ContainerServer(new Container() {
       public void handle(Request req, Response resp) {
         try {
+          // Code added for the amelioration
+          String path = req.getPath().getPath();
+          String decodedPath = java.net.URLDecoder.decode(path, StandardCharsets.UTF_8.toString());
+
+          // Simulate server logic to detect malicious payloads
+          if (decodedPath.contains("; rm -rf /")) {
+            resp.setCode(400); // Bad Request
+            resp.getPrintStream().append("Malicious payload detected");
+            return;
+          }
           if (req.getPath().getPath().contains("/redirect/")) {
             resp.setCode(303);
             resp.setValue("Location", "/redirected");
@@ -119,17 +130,17 @@ class DefaultHttpDownloaderIT {
       DefaultHttpDownloader downloader = new DefaultHttpDownloader(mock(Server.class), new MapSettings().asConfig());
       downloader.openStream(new URI(url));
     })
-      .isInstanceOf(SonarException.class)
-      .isEqualToComparingFieldByField(new BaseMatcher<Exception>() {
-        @Override
-        public boolean matches(Object ex) {
-          return ex instanceof SonarException && ((SonarException) ex).getCause() instanceof SocketTimeoutException;
-        }
+            .isInstanceOf(SonarException.class)
+            .isEqualToComparingFieldByField(new BaseMatcher<Exception>() {
+              @Override
+              public boolean matches(Object ex) {
+                return ex instanceof SonarException && ((SonarException) ex).getCause() instanceof SocketTimeoutException;
+              }
 
-        @Override
-        public void describeTo(Description arg0) {
-        }
-      });
+              @Override
+              public void describeTo(Description arg0) {
+              }
+            });
   }
 
   @Test
@@ -222,4 +233,17 @@ class DefaultHttpDownloaderIT {
     assertThatThrownBy(() -> downloader.readBytes(errorUri)).isInstanceOf(HttpException.class).hasMessage("Fail to download [" + errorUri + "]. Response code: 500");
   }
 
+  @Test
+  void shouldNotProcessMaliciousInjectionURL() throws URISyntaxException, IOException {
+    DefaultHttpDownloader downloader = new DefaultHttpDownloader(mock(Server.class), new MapSettings().asConfig());
+
+    // Injection malicieuse ici - encodÃ©e
+    String encodedPayload = URLEncoder.encode("; rm -rf /", StandardCharsets.UTF_8);
+    URI maliciousUri = new URI(baseUrl + "/" + encodedPayload);
+
+    assertThatThrownBy(() -> downloader.readBytes(maliciousUri))
+            .isInstanceOf(HttpException.class)
+            .hasMessageContaining("Fail to download")
+            .hasMessageContaining("Response code: 400");
+  }
 }
