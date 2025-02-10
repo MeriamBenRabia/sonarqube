@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu'
+          distribution: 'temurin'
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -40,6 +40,9 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew build
+
+      - name: Run test coverage analysis (JaCoCo)
+        run: ./gradlew jacocoTestReport
 
       - name: Start SonarQube
         run: |
