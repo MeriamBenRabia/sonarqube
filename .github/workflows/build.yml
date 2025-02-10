@@ -61,7 +61,7 @@ jobs:
       - name: Run SonarQube analysis
         run: |
           echo "Running SonarQube analysis..."
-          ./gradlew sonarqube --stacktrace \
+          ./gradlew sonar --stacktrace \
             -Dsonar.projectKey=tp1_inf8371 \
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} || { echo "❌ SonarQube analysis failed!"; exit 1; }
